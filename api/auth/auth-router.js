@@ -1,3 +1,7 @@
+const {sinirli, usernameBostami, usernameVarmi, sifreGecerlimi} = require("../auth/auth-middleware");
+const router = require("express").Router();
+const model2 = require("../users/users-model");
+
 // `checkUsernameFree`, `checkUsernameExists` ve `checkPasswordLength` gereklidir (require)
 // `auth-middleware.js` deki middleware fonksiyonları. Bunlara burda ihtiyacınız var!
 
