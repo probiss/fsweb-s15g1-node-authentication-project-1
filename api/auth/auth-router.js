@@ -1,4 +1,4 @@
-const {sinirli, usernameBostami, usernameVarmi, sifreGecerlimi} = require("../auth/auth-middleware");
+const { usernameBostami, usernameVarmi, sifreGecerlimi} = require("../auth/auth-middleware");
 const router = require("express").Router();
 const model2 = require("../users/users-model");
 
@@ -28,7 +28,15 @@ const model2 = require("../users/users-model");
     "message": "Şifre 3 karakterden fazla olmalı"
   }
  */
-
+  router.post("/register",sifreGecerlimi, usernameBostami, async (req, res, next) => {
+      try {
+        let insertedUser = await model2.ekle(req.body);
+        res.status(201).json(insertedUser);
+      } catch (error) {
+        next(error);
+      }
+    }
+  );
 
 /**
   2 [POST] /api/auth/login { "username": "sue", "password": "1234" }
@@ -45,7 +53,14 @@ const model2 = require("../users/users-model");
     "message": "Geçersiz kriter!"
   }
  */
-
+  router.post("/login", usernameVarmi, async (req, res, next) => {
+    try {
+      req.session.user_id = req.user.user_id;
+      res.status(200).json({ message: `Hoşgeldin ${req.user.username}!` });
+    } catch (error) {
+      next(error);
+    }
+  });
 
 /**
   3 [GET] /api/auth/logout
@@ -62,6 +77,29 @@ const model2 = require("../users/users-model");
     "message": "Oturum bulunamadı!"
   }
  */
-
+  router.get("/logout", async (req, res, next) => {
+    try {
+      if (req.session.user_id) {
+        req.session.destroy((err) => {
+          if (err) {
+            next({ message: "Logout methodunda hata oluştu" });
+          } else {
+            next({
+              status: 200,
+              message: "Çıkış yapildi",
+            });
+          }
+        });
+      } else {
+        next({
+          status: 200,
+          message: "Oturum bulunamadı!",
+        });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
  
 // Diğer modüllerde kullanılabilmesi için routerı "exports" nesnesine eklemeyi unutmayın.
+module.exports = router;
